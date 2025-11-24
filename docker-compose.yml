@@ -1,4 +1,4 @@
-version: '3.8'
+version: "3.8"
 
 services:
   web: &web
@@ -10,7 +10,7 @@ services:
     volumes:
       - ./backend:/backend
     ports:
-      - "8000:8000"
+      - "8001:8000"
     depends_on:
       - db
     env_file:
@@ -19,7 +19,7 @@ services:
   db:
     image: postgres
     ports:
-      - "5432:5432"
+      - "5433:5432"
     volumes:
       - ./backend:/backend
     env_file:
