@@ -1,0 +1,58 @@
+exclude: 'docs|node_modules|migrations|.git|.tox'
+default_stages: [commit]
+fail_fast: true
+
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v3.4.0
+    hooks:
+      - id: trailing-whitespace
+      - id: end-of-file-fixer
+        files: ^tf|-|\.(py|env|yml|yaml|pem|key|mock)$
+      - id: check-yaml
+      - id: check-json
+      - id: check-xml
+      - id: check-added-large-files
+        files: ^tf|-|\.(py|env|yml|yaml)$
+      - id: check-merge-conflict
+      - id: check-case-conflict
+      - id: check-ast
+      - id: debug-statements
+      - id: requirements-txt-fixer
+      - id: file-contents-sorter
+      - id: fix-encoding-pragma
+
+  - repo: https://github.com/odwyersoftware/brunette
+    rev: 0.2.0
+    hooks:
+      - id: brunette
+        args:
+        - --config=backend/setup.cfg
+        - --single-quotes
+
+  - repo: https://gitlab.com/pycqa/flake8
+    rev: 3.9.2
+    hooks:
+      - id: flake8
+        args: ['--config=backend/setup.cfg']
+
+  - repo: https://github.com/pycqa/pylint
+    rev: v2.10.2
+    hooks:
+      - id: pylint
+        exclude: apps/.*\/migrations/.*\.py$
+        args:
+        - --rcfile=backend/.pylintrc
+        - --errors-only
+        - --disable=no-name-in-module,import-error
+        - --ignore=migrations
+
+  - repo: https://github.com/Lucas-C/pre-commit-hooks-safety
+    rev: v1.3.1
+    hooks:
+    - id: python-safety-dependencies-check
+
+  - repo: https://github.com/PyCQA/bandit
+    rev: 1.7.0
+    hooks:
+    - id: bandit

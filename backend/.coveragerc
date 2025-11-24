@@ -1,0 +1,31 @@
+[run]
+omit =
+    .idea/*
+    apps/*/__init__.py
+    apps/*/migrations/*
+    apps/*/apps.py
+    apps/*/tests.py
+    apps/*/urls.py
+    templates/*
+    static/*
+    media/*
+    compose/*
+    config/*
+    manage.py
+
+[report]
+omit =
+    .idea/*
+    apps/*/__init__.py
+    apps/*/migrations/*
+    apps/*/apps.py
+    apps/*/tests.py
+    apps/*/urls.py
+    templates/*
+    static/*
+    media/*
+    compose/*
+    config/*
+    manage.py
+
+show_missing = True
