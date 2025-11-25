@@ -185,6 +185,13 @@ SIMPLE_JWT = {
     "SLIDING_TOKEN_REFRESH_EXP_CLAIM": "refresh_exp",
 }
 
+SPECTACULAR_SETTINGS = {
+    "TITLE": "EDL API V1",
+    "DESCRIPTION": "Backend for EDL Spotter",
+    "VERSION": "1.0.0",
+    "SERVE_INCLUDE_SCHEMA": False,
+}
+
 AUTH_USER_MODEL = "users.CustomUser"
 
 DEBUG_API_REQUESTS = True
