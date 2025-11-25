@@ -35,13 +35,13 @@ urlpatterns = [
         name="redoc",
     ),
     # JWT
-    path(
-        "api/v1/users/token/", TokenObtainPairView.as_view(), name="token_obtain_pair"
-    ),
-    path("api/v1/users/token/verify/", TokenVerifyView.as_view(), name="token_verify"),
-    path(
-        "api/v1/users/token/refresh/", TokenRefreshView.as_view(), name="token_refresh"
-    ),
+    # path(
+    #     "api/v1/users/token/", TokenObtainPairView.as_view(), name="token_obtain_pair"
+    # ),
+    # path("api/v1/users/token/verify/", TokenVerifyView.as_view(), name="token_verify"),
+    # path(
+    #     "api/v1/users/token/refresh/", TokenRefreshView.as_view(), name="token_refresh"
+    # ),
     # YOUR PATTERNS
     path("api/v1/core/", include("core.urls")),
     path("api/v1/users/", include("users.urls")),

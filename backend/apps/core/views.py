@@ -13,6 +13,15 @@ from functools import lru_cache
 from drf_spectacular.utils import extend_schema
 from rest_framework.generics import ListAPIView
 from rest_framework.permissions import AllowAny
+from rest_framework.decorators import api_view, permission_classes
+from rest_framework.response import Response
+
+# Local
+from core.serializers import (
+    HealthSerializer,
+    TripPlanRequestSerializer,
+    TripPlanResponseSerializer,
+)
 
 MAX_DRIVE_SHIFT = 11 * 60
 MAX_ON_DUTY_SHIFT = 14 * 60
@@ -33,9 +42,11 @@ session = requests.Session()
     summary="Health",
     description="Endpoint to get the status of backend",
     tags=["Health"],
+    responses=HealthSerializer
 )
 class HealthAPIView(ListAPIView):
     permission_classes = [AllowAny]
+    pagination_class = None
 
     def list(self, request, *args, **kwargs):
         regex = re.compile("^HTTP_")
@@ -183,42 +194,57 @@ def run_hos_simulation(dist_pickup, dist_drop, cycle_used_start):
     return logs
 
 
-@csrf_exempt
-@require_POST
+@extend_schema(
+    summary="Generate Trip Plan",
+    description="Calculates a compliant ELD route plan based on HOS rules.",
+    request=TripPlanRequestSerializer,
+    responses={200: TripPlanResponseSerializer},
+    tags=["Planning"],
+)
+@api_view(["POST"])
+@permission_classes([AllowAny])
 def generate_trip_plan(request):
     try:
-        body = json.loads(request.body)
+        # Validate request data using serializer
+        serializer = TripPlanRequestSerializer(data=request.data)
+        if not serializer.is_valid():
+            return Response(serializer.errors, status=400)
 
-        start = get_coordinates(body.get("start"))
-        pickup = get_coordinates(body.get("pickup"))
-        drop = get_coordinates(body.get("dropoff"))
+        data = serializer.validated_data
+        start_addr = data["start"]
+        pickup_addr = data["pickup"]
+        drop_addr = data["dropoff"]
+        cycle_used = data["cycleUsed"]
+
+        start = get_coordinates(start_addr)
+        pickup = get_coordinates(pickup_addr)
+        drop = get_coordinates(drop_addr)
 
         if not all([start, pickup, drop]):
-            return JsonResponse({"error": "Invalid address provided."}, status=400)
+            return Response({"error": "Invalid address provided."}, status=400)
 
         dist1 = calculate_distance(start, pickup)
         dist2 = calculate_distance(pickup, drop)
 
         if dist1 is None or dist2 is None:
-            return JsonResponse({"error": "Routing API failed."}, status=500)
+            return Response({"error": "Routing API failed."}, status=500)
 
         total = round(dist1 + dist2)
 
-        logs = run_hos_simulation(dist1, dist2, float(body.get("cycleUsed", 0)))
+        logs = run_hos_simulation(dist1, dist2, cycle_used)
 
         if logs and not logs[-1]["entries"]:
             logs.pop()
 
-        return JsonResponse(
-            {
-                "status": "success",
-                "routeData": {
-                    "totalMiles": total,
-                    "locations": [start, pickup, drop],
-                },
-                "logs": logs,
-            }
-        )
+        response_data = {
+            "status": "success",
+            "routeData": {
+                "totalMiles": total,
+                "locations": [start, pickup, drop],
+            },
+            "logs": logs,
+        }
+        return Response(response_data)
 
     except Exception as e:
-        return JsonResponse({"error": str(e)}, status=500)
+        return Response({"error": str(e)}, status=500)
